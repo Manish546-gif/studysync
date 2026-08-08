@@ -13,9 +13,15 @@ const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const Room = require('./models/Room');
 
+
+
+
 const authRoutes = require('./routes/auth');
+
 const roomRoutes = require('./routes/rooms');
+
 const whiteboardRoutes = require('./routes/whiteboards');
+
 const notebookRoutes = require('./routes/notebooks');
 const fileRoutes = require('./routes/files');
 

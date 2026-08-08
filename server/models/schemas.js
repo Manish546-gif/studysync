@@ -8,7 +8,9 @@ const drawActionSchema = new mongoose.Schema({
   text: { type: String },
   x: { type: Number },
   y: { type: Number },
+  
   w: { type: Number },
+  
   h: { type: Number },
   fill: { type: String },
   stroke: { type: String },

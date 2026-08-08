@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
+      
       validator: (v) => !v || v.length >= 6,
       message: 'Password must be at least 6 characters',
     },

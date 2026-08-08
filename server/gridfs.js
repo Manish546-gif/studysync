@@ -9,8 +9,11 @@ function getBucket() {
 }
 
 function uploadToGridFS(buffer, { filename, contentType }) {
+
   return new Promise((resolve, reject) => {
+
     const bucket = getBucket();
+
     const uploadStream = bucket.openUploadStream(filename, { contentType });
     uploadStream.on('error', reject);
     uploadStream.on('finish', (file) => resolve(file));

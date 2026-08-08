@@ -10,7 +10,7 @@ const messageSchema = new mongoose.Schema({
 }, { _id: true });
 
 const fileSchema = new mongoose.Schema({
-  fileName: { type: String, required: true },
+  fileName: { type:  String, required: true },
   storedName: { type: String, required: true },
   mimeType: { type: String, default: '' },
   size: { type: Number, default: 0 },
