@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// WebRTC helper
+// - Uses socket events to coordinate offer/answer and ICE candidates.
+// - Expected server socket events for WebRTC coordination:
+//   * Client -> Server: 'webrtc-ready' (signals ready to connect)
+//   * Server -> Client: 'webrtc-user-joined' ({ socketId, userId })
+//   * Client -> Server: 'webrtc-offer' / 'webrtc-answer' with { target, offer/answer }
+//   * Client -> Server: 'webrtc-ice-candidate' with { target, candidate }
+//   * Server -> Client: 'webrtc-user-left' ({ socketId })
+// - The server should forward offer/answer/candidate messages to the intended target socket.
 const ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -16,6 +25,9 @@ export function useWebRTC(socketRef, roomId, localUserId) {
   const localStreamRef = useRef(null);
 
   const getLocalStream = useCallback(async (audio = true, video = true) => {
+    // Attempts to obtain local media. Backend does not participate directly,
+    // but the signalling server must forward WebRTC messages so peers can
+    // establish direct P2P media connections.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio, video });
       const audioTrack = stream.getAudioTracks()[0];
@@ -72,6 +84,8 @@ export function useWebRTC(socketRef, roomId, localUserId) {
   }, [socketRef]);
 
   const createOffer = useCallback(async (remoteSocketId, stream) => {
+    // Create and send SDP offer to a specific remote socket via the signalling server.
+    // The server should forward this payload to the `remoteSocketId`.
     const pc = createPeer(remoteSocketId, stream, true);
     try {
       const offer = await pc.createOffer();

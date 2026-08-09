@@ -1,6 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
+// Socket helper for real-time room interactions.
+// - `SOCKET_URL` comes from `VITE_SOCKET_URL`.
+// - Client attaches `auth: { token }` on connect (expects server to validate JWT).
+//
+// Client-emitted events (server should handle):
+// - 'join-room' (roomId)
+// - 'leave-room' (roomId)
+// - 'send-message' ({ text }) -> server should broadcast 'chat-message'
+// - 'file-uploaded' ({ ...file }) -> server should broadcast 'new-file'
+// - 'file-deleted' ({ fileId }) -> server should broadcast 'file-removed'
+// - 'draw-action', 'move-action', 'undo-action', 'clear-whiteboard' (whiteboard events)
+// - 'cursor-move' ({ x, y, userName })
+// - 'live-path' / 'live-path-end' for live-drawing previews
+//
+// Server-emitted events (frontend expects):
+// - 'room-users' (array of users)
+// - 'chat-history' (array)
+// - 'chat-message' (message)
+// - 'new-file' / 'file-removed' (file updates)
+// - whiteboard and cursor events listed above
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '';
 
 export function useSocket(roomId) {
@@ -114,6 +134,7 @@ export function useSocket(roomId) {
   }, [roomId]);
 
   const emitDraw = useCallback((action) => {
+    // action: { _id, type, x, y, ... } — server should broadcast to other users
     socketRef.current?.emit('draw-action', action);
   }, []);
 
@@ -122,6 +143,7 @@ export function useSocket(roomId) {
   }, []);
 
   const emitCursor = useCallback((x, y) => {
+    // payload: { x, y, userName }
     socketRef.current?.emit('cursor-move', { x, y });
   }, []);
 
@@ -142,6 +164,7 @@ export function useSocket(roomId) {
   }, []);
 
   const emitMessage = useCallback((text) => {
+    // send chat message to server; server should append metadata (sender, time)
     socketRef.current?.emit('send-message', { text });
   }, []);
 
