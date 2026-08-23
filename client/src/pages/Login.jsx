@@ -52,14 +52,14 @@ export default function Login() {
         initial={{ x: -60, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 28 }}
-        className="hidden lg:flex relative w-1/2 flex-col justify-between bg-[#210B2C] p-10 xl:p-14 overflow-hidden"
+        className="hidden lg:flex relative w-1/2 flex-col justify-between bg-[#432033] p-10 xl:p-14 overflow-hidden"
       >
         <div className="relative z-10 max-w-[28rem]">
           <h1 className="font-display text-[2.6rem] leading-[1.1] font-bold text-white tracking-tight">
             Master your craft <br />
-            <span className="text-[#C084FC]">together.</span>
+            <span className="text-[#AF6384]">together.</span>
           </h1>
-          <p className="mt-5 text-sm leading-relaxed text-white/50 max-w-[24rem]">
+          <p className="mt-5 text-sm leading-relaxed text-white/60 max-w-[24rem]">
             An infinite canvas where ideas meet. Collaborate in real-time, study
             smarter, and build something amazing with your peers.
           </p>
@@ -69,20 +69,20 @@ export default function Login() {
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-64 rounded-2xl bg-[#C084FC] p-4 shadow-lg shadow-black/20 -rotate-2"
+            className="w-64 rounded-2xl bg-[#AF6384] p-4 shadow-lg shadow-black/30 -rotate-2"
           >
-            <StickyNote size={16} className="text-[#210B2C]/70 mb-2" />
-            <p className="text-xs leading-relaxed font-semibold text-[#210B2C]">
+            <StickyNote size={16} className="text-white/80 mb-2" />
+            <p className="text-xs leading-relaxed font-semibold text-white">
               Biology Quiz Prep: Focus on cellular respiration tomorrow!
             </p>
           </motion.div>
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-            className="w-64 rounded-2xl bg-[#BC96E6] p-4 shadow-lg shadow-black/20 rotate-2 ml-10"
+            className="w-64 rounded-2xl bg-[#976D90] p-4 shadow-lg shadow-black/30 rotate-2 ml-10"
           >
-            <Brain size={16} className="text-[#210B2C]/70 mb-2" />
-            <p className="text-xs leading-relaxed font-semibold text-[#210B2C]">
+            <Brain size={16} className="text-white/80 mb-2" />
+            <p className="text-xs leading-relaxed font-semibold text-white">
               Brainstorming session for the final project at 4PM.
             </p>
           </motion.div>
@@ -93,8 +93,8 @@ export default function Login() {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute top-48 right-24 z-20"
         >
-          <MousePointer2 size={18} className="text-[#BC96E6] -rotate-12" fill="currentColor" />
-          <span className="mt-1 inline-block rounded-full bg-[#BC96E6] px-2.5 py-0.5 text-[10px] font-bold text-[#210B2C]">
+          <MousePointer2 size={18} className="text-[#976D90] -rotate-12" fill="currentColor" />
+          <span className="mt-1 inline-block rounded-full bg-[#976D90] px-2.5 py-0.5 text-[10px] font-bold text-white">
             Alex M.
           </span>
         </motion.div>
@@ -103,8 +103,8 @@ export default function Login() {
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
           className="absolute top-72 right-48 z-20"
         >
-          <MousePointer2 size={18} className="text-[#FF4262] rotate-12" fill="currentColor" />
-          <span className="mt-1 inline-block rounded-full bg-[#FF4262] px-2.5 py-0.5 text-[10px] font-semibold text-white">
+          <MousePointer2 size={18} className="text-[#AF6384] rotate-12" fill="currentColor" />
+          <span className="mt-1 inline-block rounded-full bg-[#AF6384] px-2.5 py-0.5 text-[10px] font-semibold text-white">
             Sarah K.
           </span>
         </motion.div>
@@ -112,18 +112,18 @@ export default function Login() {
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex -space-x-2">
             {['A', 'M', 'K'].map((init, i) => (
-              <div key={i} className="w-8 h-8 rounded-full border-2 border-[#210B2C] bg-[#BC96E6] flex items-center justify-center text-[10px] font-bold text-[#210B2C] font-display">
+              <div key={i} className="w-8 h-8 rounded-full border-2 border-[#432033] bg-[#EED4D1] flex items-center justify-center text-[10px] font-bold text-[#432033] font-display">
                 {init}
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-white/40">
-            Trusted by <span className="text-white/70 font-medium">50,000+</span> students
+          <p className="text-[11px] text-white/50">
+            Trusted by <span className="text-white/80 font-medium">50,000+</span> students
           </p>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#C084FC]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-10 w-40 h-40 bg-[#BC96E6]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#AF6384]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-10 w-40 h-40 bg-[#976D90]/20 rounded-full blur-3xl pointer-events-none" />
       </motion.div>
 
       {/* Right panel — form */}
@@ -137,8 +137,8 @@ export default function Login() {
 
         <div className="relative z-10 w-full max-w-[24rem]">
           <div className="flex items-center gap-2.5 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-[#C084FC] flex items-center justify-center shadow-sm">
-              <Send size={18} className="text-[#210B2C]" />
+            <div className="w-9 h-9 rounded-xl bg-[#AF6384] flex items-center justify-center shadow-sm">
+              <Send size={18} className="text-white" />
             </div>
             <span className="font-display text-lg font-bold text-on-surface">StudySync</span>
           </div>
@@ -147,7 +147,7 @@ export default function Login() {
             <motion.div
               layout
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="absolute top-1 bottom-1 w-[calc(50%-2px)] rounded-full bg-[#C084FC] shadow-sm"
+              className="absolute top-1 bottom-1 w-[calc(50%-2px)] rounded-full bg-[#AF6384] shadow-sm"
               style={{ left: isLogin ? '4px' : 'calc(50% + 0px)' }}
             />
             {['Sign In', 'Create Account'].map((tab, i) => (
@@ -156,7 +156,7 @@ export default function Login() {
                 onClick={() => { setIsLogin(i === 0); setError('') }}
                 className="relative z-10 flex-1 py-2 text-sm font-semibold rounded-full transition-colors"
               >
-                <span className={isLogin === (i === 0) ? 'text-[#210B2C] font-bold' : 'text-on-surface/50'}>
+                <span className={isLogin === (i === 0) ? 'text-white font-bold' : 'text-on-surface/50'}>
                   {tab}
                 </span>
               </button>
@@ -216,7 +216,7 @@ export default function Login() {
               {!isLogin && (
                 <motion.div variants={fieldVariants}>
                   <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Full Name</label>
-                  <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
+                  <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#AF6384] focus-within:shadow-[0_0_0_3px_rgba(175,99,132,0.25)]">
                     <input
                       type="text"
                       value={name}
@@ -230,7 +230,7 @@ export default function Login() {
 
               <motion.div variants={fieldVariants}>
                 <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Email</label>
-                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
+                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#AF6384] focus-within:shadow-[0_0_0_3px_rgba(175,99,132,0.25)]">
                   <input
                     type="email"
                     value={email}
@@ -243,7 +243,7 @@ export default function Login() {
 
               <motion.div variants={fieldVariants}>
                 <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Password</label>
-                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
+                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#AF6384] focus-within:shadow-[0_0_0_3px_rgba(175,99,132,0.25)]">
                   <input
                     type={showPw ? 'text' : 'password'}
                     value={password}
@@ -263,7 +263,7 @@ export default function Login() {
 
               {isLogin && (
                 <motion.div variants={fieldVariants} className="flex justify-end">
-                  <span className="text-xs font-medium text-[#BC96E6] hover:text-[#c084fc] hover:underline cursor-pointer">
+                  <span className="text-xs font-medium text-[#976D90] hover:text-[#af6384] hover:underline cursor-pointer">
                     Forgot Password?
                   </span>
                 </motion.div>
@@ -275,7 +275,7 @@ export default function Login() {
                   disabled={submitting}
                   whileHover={{ scale: 1.005 }}
                   whileTap={{ scale: 0.985 }}
-                  className="w-full py-3 rounded-2xl bg-[#C084FC] text-[#210B2C] text-sm font-bold overflow-hidden shadow-md shadow-[#C084FC]/25 hover:bg-[#d8b4fe] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-3 rounded-2xl bg-[#AF6384] text-white text-sm font-bold overflow-hidden shadow-md shadow-[#AF6384]/25 hover:bg-[#c27094] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
                   {isLogin ? 'Sign In' : 'Create Account'}
