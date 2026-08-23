@@ -57,7 +57,7 @@ export default function Login() {
         <div className="relative z-10 max-w-[28rem]">
           <h1 className="font-display text-[2.6rem] leading-[1.1] font-bold text-white tracking-tight">
             Master your craft <br />
-            <span className="text-[#FFD166]">together.</span>
+            <span className="text-[#C084FC]">together.</span>
           </h1>
           <p className="mt-5 text-sm leading-relaxed text-white/50 max-w-[24rem]">
             An infinite canvas where ideas meet. Collaborate in real-time, study
@@ -69,7 +69,7 @@ export default function Login() {
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-64 rounded-2xl bg-[#FFD166] p-4 shadow-lg shadow-black/20 -rotate-2"
+            className="w-64 rounded-2xl bg-[#C084FC] p-4 shadow-lg shadow-black/20 -rotate-2"
           >
             <StickyNote size={16} className="text-[#210B2C]/70 mb-2" />
             <p className="text-xs leading-relaxed font-semibold text-[#210B2C]">
@@ -122,7 +122,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#FFD166]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#C084FC]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 right-10 w-40 h-40 bg-[#BC96E6]/15 rounded-full blur-3xl pointer-events-none" />
       </motion.div>
 
@@ -137,7 +137,7 @@ export default function Login() {
 
         <div className="relative z-10 w-full max-w-[24rem]">
           <div className="flex items-center gap-2.5 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-[#FFD166] flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-[#C084FC] flex items-center justify-center shadow-sm">
               <Send size={18} className="text-[#210B2C]" />
             </div>
             <span className="font-display text-lg font-bold text-on-surface">StudySync</span>
@@ -147,7 +147,7 @@ export default function Login() {
             <motion.div
               layout
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="absolute top-1 bottom-1 w-[calc(50%-2px)] rounded-full bg-[#FFD166] shadow-sm"
+              className="absolute top-1 bottom-1 w-[calc(50%-2px)] rounded-full bg-[#C084FC] shadow-sm"
               style={{ left: isLogin ? '4px' : 'calc(50% + 0px)' }}
             />
             {['Sign In', 'Create Account'].map((tab, i) => (
@@ -216,7 +216,7 @@ export default function Login() {
               {!isLogin && (
                 <motion.div variants={fieldVariants}>
                   <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Full Name</label>
-                  <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#FFD166] focus-within:shadow-[0_0_0_3px_rgba(255,209,102,0.25)]">
+                  <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
                     <input
                       type="text"
                       value={name}
@@ -230,7 +230,7 @@ export default function Login() {
 
               <motion.div variants={fieldVariants}>
                 <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Email</label>
-                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#FFD166] focus-within:shadow-[0_0_0_3px_rgba(255,209,102,0.25)]">
+                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
                   <input
                     type="email"
                     value={email}
@@ -243,7 +243,7 @@ export default function Login() {
 
               <motion.div variants={fieldVariants}>
                 <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Password</label>
-                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#FFD166] focus-within:shadow-[0_0_0_3px_rgba(255,209,102,0.25)]">
+                <div className="flex items-center rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 transition-all focus-within:border-[#C084FC] focus-within:shadow-[0_0_0_3px_rgba(192,132,252,0.25)]">
                   <input
                     type={showPw ? 'text' : 'password'}
                     value={password}
@@ -263,7 +263,7 @@ export default function Login() {
 
               {isLogin && (
                 <motion.div variants={fieldVariants} className="flex justify-end">
-                  <span className="text-xs font-medium text-[#BC96E6] hover:text-[#a87ed4] hover:underline cursor-pointer">
+                  <span className="text-xs font-medium text-[#BC96E6] hover:text-[#c084fc] hover:underline cursor-pointer">
                     Forgot Password?
                   </span>
                 </motion.div>
@@ -275,7 +275,7 @@ export default function Login() {
                   disabled={submitting}
                   whileHover={{ scale: 1.005 }}
                   whileTap={{ scale: 0.985 }}
-                  className="w-full py-3 rounded-2xl bg-[#FFD166] text-[#210B2C] text-sm font-bold overflow-hidden shadow-md shadow-[#FFD166]/20 hover:bg-[#ffe085] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-3 rounded-2xl bg-[#C084FC] text-[#210B2C] text-sm font-bold overflow-hidden shadow-md shadow-[#C084FC]/25 hover:bg-[#d8b4fe] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
                   {isLogin ? 'Sign In' : 'Create Account'}
