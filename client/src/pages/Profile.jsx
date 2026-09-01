@@ -6,15 +6,6 @@ import gsap from 'gsap'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
 
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-}
 
 function timeAgo(date) {
   const diff = Date.now() - new Date(date).getTime()
