@@ -215,6 +215,31 @@ export default function MyWhiteboards() {
               </div>
             </section>
           )}
+<motion.div ref={statsRef} variants={fadeUp} className="grid grid-cols-3 gap-4 mb-8">
+        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
+          <Users size={20} className="text-primary mx-auto mb-2" />
+          <p className="font-display text-3xl font-bold text-on-surface">
+            <span className="count-up" data-target={rooms.length}>0</span>
+          </p>
+          <p className="text-xs text-on-surface/40 mt-1">Total Rooms</p>
+        </div>
+        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
+          <Edit3 size={20} className="text-tertiary mx-auto mb-2" />
+          <p className="font-display text-3xl font-bold text-on-surface">
+            <span className="count-up" data-target={createdRooms.length}>0</span>
+          </p>
+          <p className="text-xs text-on-surface/40 mt-1">Created</p>
+        </div>
+        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
+          <Users size={20} className="text-secondary mx-auto mb-2" />
+          <p className="font-display text-3xl font-bold text-on-surface">
+            <span className="count-up" data-target={joinedRooms.length}>0</span>
+          </p>
+          <p className="text-xs text-on-surface/40 mt-1">Joined</p>
+        </div>
+      </motion.div>
+
+
 
           <section>
             <div className="flex items-center gap-2 mb-4">
