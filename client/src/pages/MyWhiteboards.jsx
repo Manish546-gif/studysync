@@ -33,496 +33,329 @@ function timeAgo(value) {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
-export default function MyWhiteboards() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
+// Color palette available for tagging/organizing boards
+const BOARD_COLORS = [
+  { name: 'Slate', value: '#64748b' },
+  { name: 'Red', value: '#ef4444' },
+  { name: 'Orange', value: '#f97316' },
+  { name: 'Amber', value: '#f59e0b' },
+  { name: 'Green', value: '#22c55e' },
+  { name: 'Teal', value: '#14b8a6' },
+  { name: 'Blue', value: '#3b82f6' },
+  { name: 'Indigo', value: '#6366f1' },
+  { name: 'Purple', value: '#a855f7' },
+  { name: 'Pink', value: '#ec4899' },
+]
 
-  const [boards, setBoards] = useState([])
-  const [notebooks, setNotebooks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  const [createBoardOpen, setCreateBoardOpen] = useState(false)
-  const [boardTitle, setBoardTitle] = useState('')
-  const [boardDesc, setBoardDesc] = useState('')
-  const [boardNotebook, setBoardNotebook] = useState('')
-  const [creatingBoard, setCreatingBoard] = useState(false)
-  const [boardError, setBoardError] = useState('')
-
-  const [createNotebookOpen, setCreateNotebookOpen] = useState(false)
-  const [notebookName, setNotebookName] = useState('')
-  const [creatingNotebook, setCreatingNotebook] = useState(false)
-  const [notebookError, setNotebookError] = useState('')
-  const [shareBoard, setShareBoard] = useState(null)
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [deleting, setDeleting] = useState(false)
-
-  const load = useCallback(() => {
-    setLoading(true)
-    Promise.all([api.getWhiteboards(), api.getNotebooks()])
-      .then(([wb, nb]) => {
-        setBoards(wb.whiteboards || [])
-        setNotebooks(nb.notebooks || [])
-        setError('')
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => { load() }, [load])
-
-  const myId = String(user?.id)
-
-  const owned = boards.filter((b) => String(b.owner?._id || b.owner) === myId)
-  const shared = boards.filter((b) => String(b.owner?._id || b.owner) !== myId)
-  const unfiled = owned.filter((b) => !b.notebook)
-
-  const openCreateBoard = () => {
-    setBoardError('')
-    setCreateBoardOpen(true)
-  }
-
-  const openCreateNotebook = () => {
-    setNotebookError('')
-    setCreateNotebookOpen(true)
-  }
-
-  const handleCreateBoard = async (e) => {
-    e.preventDefault()
-    if (!boardTitle.trim()) return
-    setCreatingBoard(true)
-    setBoardError('')
-    try {
-      const data = await api.createWhiteboard({
-        title: boardTitle.trim(),
-        description: boardDesc.trim(),
-        notebook: boardNotebook || null,
-      })
-      setBoards((prev) => [data.whiteboard, ...prev])
-      setBoardTitle('')
-      setBoardDesc('')
-      setBoardNotebook('')
-      setCreateBoardOpen(false)
-      if (!data.whiteboard.pending) {
-        navigate(`/whiteboards/${data.whiteboard._id}`)
-      }
-    } catch (err) {
-      setBoardError(err.message || 'Failed to create whiteboard')
-    } finally {
-      setCreatingBoard(false)
-    }
-  }
-
-  const handleCreateNotebook = async (e) => {
-    e.preventDefault()
-    if (!notebookName.trim()) return
-    setCreatingNotebook(true)
-    setNotebookError('')
-    try {
-      const data = await api.createNotebook(notebookName.trim())
-      setNotebooks((prev) => [data.notebook, ...prev])
-      setNotebookName('')
-      setCreateNotebookOpen(false)
-    } catch (err) {
-      setNotebookError(err.message || 'Failed to create notebook')
-    } finally {
-      setCreatingNotebook(false)
-    }
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!deleteConfirm) return
-    const { type, id } = deleteConfirm
-    setDeleting(true)
-    try {
-      if (type === 'notebook') {
-        await api.deleteNotebook(id)
-        setNotebooks((prev) => prev.filter((n) => n._id !== id))
-        setBoards((prev) => prev.map((b) => (String(b.notebook) === String(id) ? { ...b, notebook: null } : b)))
-      } else {
-        await api.deleteWhiteboard(id)
-        setBoards((prev) => prev.filter((b) => b._id !== id))
-      }
-      setDeleteConfirm(null)
-    } catch (err) {
-      alert(err.message)
-    } finally {
-      setDeleting(false)
-    }
-  }
-
-  const handleMove = async (id, notebookId) => {
-    try {
-      const data = await api.updateWhiteboard(id, { notebook: notebookId || null })
-      setBoards((prev) => prev.map((b) => (b._id === id ? data.whiteboard : b)))
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-
-  const inputCls =
-    'w-full px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm text-on-surface placeholder:text-on-surface/25 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors'
-
+function ColorSwatchPicker({ selected, onSelect }) {
   return (
-    <div className="p-6 md:p-12 max-w-6xl mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-on-surface mb-1">My Whiteboard</h1>
-          <p className="text-on-surface/50 text-sm">Create boards for different things, organize them into notebooks, and share them with others.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => openCreateNotebook()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-high text-on-surface rounded-xl text-sm font-semibold hover:bg-surface-container-high/80 transition-colors"
-          >
-            <Folder size={16} /> New Notebook
-          </button>
-          <button
-            onClick={() => openCreateBoard()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
-          >
-            <Plus size={16} /> New Whiteboard
-          </button>
-        </div>
-      </div>
-
-      {error && <p className="text-sm text-error mb-6">{error}</p>}
-
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      ) : (
-        <div className="space-y-10">
-          {shared.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Share2 size={16} className="text-on-surface/40" />
-                <h2 className="font-display text-sm font-bold text-on-surface uppercase tracking-wider">Shared with me</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {shared.map((wb) => (
-                  <BoardCard
-                    key={wb._id}
-                    board={wb}
-                    isOwner={false}
-                    onOpen={() => navigate(`/whiteboards/${wb._id}`)}
-                    onDelete={() => setDeleteConfirm({ type: 'board', id: wb._id })}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-<motion.div ref={statsRef} variants={fadeUp} className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
-          <Users size={20} className="text-primary mx-auto mb-2" />
-          <p className="font-display text-3xl font-bold text-on-surface">
-            <span className="count-up" data-target={rooms.length}>0</span>
-          </p>
-          <p className="text-xs text-on-surface/40 mt-1">Total Rooms</p>
-        </div>
-        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
-          <Edit3 size={20} className="text-tertiary mx-auto mb-2" />
-          <p className="font-display text-3xl font-bold text-on-surface">
-            <span className="count-up" data-target={createdRooms.length}>0</span>
-          </p>
-          <p className="text-xs text-on-surface/40 mt-1">Created</p>
-        </div>
-        <div className="bg-surface-container-low rounded-2xl hairline p-6 text-center">
-          <Users size={20} className="text-secondary mx-auto mb-2" />
-          <p className="font-display text-3xl font-bold text-on-surface">
-            <span className="count-up" data-target={joinedRooms.length}>0</span>
-          </p>
-          <p className="text-xs text-on-surface/40 mt-1">Joined</p>
-        </div>
-      </motion.div>
-
-
-
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Folder size={16} className="text-on-surface/40" />
-              <h2 className="font-display text-sm font-bold text-on-surface uppercase tracking-wider">Notebooks</h2>
-            </div>
-            {notebooks.length === 0 ? (
-              <button
-                onClick={() => openCreateNotebook()}
-                className="w-full border-2 border-dashed border-outline-variant/40 rounded-2xl p-6 flex items-center justify-center gap-2 text-on-surface/40 hover:border-primary hover:text-primary transition-colors"
-              >
-                <Folder size={18} /> Create your first notebook to organize boards
-              </button>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {notebooks.map((nb) => {
-                  const nbBoards = owned.filter((b) => String(b.notebook) === String(nb._id))
-                  return (
-                    <div
-                      key={nb._id}
-                      className="bg-surface-container-low rounded-2xl border border-outline-variant/20 overflow-hidden"
-                    >
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <div className="w-9 h-9 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center shrink-0">
-                          <Folder size={16} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-on-surface truncate">{nb.name}</p>
-                          <p className="text-[11px] text-on-surface/40">{nbBoards.length} board{nbBoards.length !== 1 ? 's' : ''}</p>
-                        </div>
-                        <button
-                          onClick={() => setDeleteConfirm({ type: 'notebook', id: nb._id })}
-                          className="text-on-surface/30 hover:text-error transition-colors shrink-0"
-                          title="Delete notebook"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                      <div className="px-3 pb-3 space-y-2">
-                        {nbBoards.map((wb) => (
-                          <div
-                            key={wb._id}
-                            className="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 hover:border-primary-container cursor-pointer transition-colors"
-                            onClick={() => navigate(`/whiteboards/${wb._id}`)}
-                          >
-                            <FileText size={14} className="text-on-surface/30 shrink-0" />
-                            <p className="flex-1 text-xs font-medium text-on-surface truncate">{wb.title}</p>
-                            <span className="text-[10px] text-on-surface/30 shrink-0">{wb.actions?.length || 0}</span>
-                          </div>
-                        ))}
-                        {nbBoards.length === 0 && (
-                          <p className="text-xs text-on-surface/25 px-1 py-1">No boards yet — add one below.</p>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </section>
-
-          <section>
-            <div className="flex items-center gap-2 mb-4">
-              <PenTool size={16} className="text-on-surface/40" />
-              <h2 className="font-display text-sm font-bold text-on-surface uppercase tracking-wider">Whiteboards</h2>
-            </div>
-            {unfiled.length === 0 ? (
-              <button
-                onClick={() => openCreateBoard()}
-                className="w-full border-2 border-dashed border-outline-variant/40 rounded-2xl p-6 flex items-center justify-center gap-2 text-on-surface/40 hover:border-primary hover:text-primary transition-colors"
-              >
-                <Plus size={18} /> Create your first whiteboard
-              </button>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {unfiled.map((wb) => (
-                  <BoardCard
-                    key={wb._id}
-                    board={wb}
-                    isOwner
-                    notebooks={notebooks}
-                    onOpen={() => navigate(`/whiteboards/${wb._id}`)}
-                    onDelete={() => setDeleteConfirm({ type: 'board', id: wb._id })}
-                    onShare={() => setShareBoard(wb)}
-                    onMove={handleMove}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
-      )}
-
-      {/* Create whiteboard modal */}
-      <AnimatePresence>
-        {createBoardOpen && (
-          <Modal title="New Whiteboard" onClose={() => setCreateBoardOpen(false)}>
-            <form onSubmit={handleCreateBoard} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Title</label>
-                <input autoFocus value={boardTitle} onChange={(e) => setBoardTitle(e.target.value)} placeholder="e.g. Calculus Revision" className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Description (optional)</label>
-                <input value={boardDesc} onChange={(e) => setBoardDesc(e.target.value)} placeholder="What is this board for?" className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Notebook (optional)</label>
-                <select value={boardNotebook} onChange={(e) => setBoardNotebook(e.target.value)} className={inputCls}>
-                  <option value="">No notebook</option>
-                  {notebooks.map((n) => (
-                    <option key={n._id} value={n._id}>{n.name}</option>
-                  ))}
-                </select>
-              </div>
-              {boardError && <p className="text-xs text-error">{boardError}</p>}
-              <div className="flex justify-end gap-2 pt-1">
-                <button type="button" onClick={() => setCreateBoardOpen(false)} className="px-4 py-2.5 text-sm text-on-surface/50 hover:bg-surface-container rounded-xl transition-colors">Cancel</button>
-                <button type="submit" disabled={!boardTitle.trim() || creatingBoard} className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
-                  {creatingBoard ? (<><Loader2 size={15} className="animate-spin" /> Creating...</>) : 'Create Board'}
-                </button>
-              </div>
-            </form>
-          </Modal>
-        )}
-      </AnimatePresence>
-
-      {/* Create notebook modal */}
-      <AnimatePresence>
-        {createNotebookOpen && (
-          <Modal title="New Notebook" onClose={() => setCreateNotebookOpen(false)}>
-            <form onSubmit={handleCreateNotebook} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-on-surface/50 mb-1.5">Name</label>
-                <input autoFocus value={notebookName} onChange={(e) => setNotebookName(e.target.value)} placeholder="e.g. Chemistry" className={inputCls} />
-              </div>
-              {notebookError && <p className="text-xs text-error">{notebookError}</p>}
-              <div className="flex justify-end gap-2 pt-1">
-                <button type="button" onClick={() => setCreateNotebookOpen(false)} className="px-4 py-2.5 text-sm text-on-surface/50 hover:bg-surface-container rounded-xl transition-colors">Cancel</button>
-                <button type="submit" disabled={!notebookName.trim() || creatingNotebook} className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
-                  {creatingNotebook ? (<><Loader2 size={15} className="animate-spin" /> Creating...</>) : 'Create Notebook'}
-                </button>
-              </div>
-            </form>
-          </Modal>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {shareBoard && <ShareWhiteboardModal board={shareBoard} onClose={() => setShareBoard(null)} />}
-      </AnimatePresence>
-
-      <ConfirmationModal
-        open={!!deleteConfirm}
-        onClose={() => setDeleteConfirm(null)}
-        onConfirm={handleConfirmDelete}
-        title={deleteConfirm?.type === 'notebook' ? 'Delete Notebook' : 'Delete Whiteboard'}
-        message={
-          deleteConfirm?.type === 'notebook'
-            ? 'This notebook will be deleted. Its whiteboards will be moved to the main list.'
-            : 'This whiteboard will be permanently deleted. This cannot be undone.'
-        }
-        confirmText="Delete"
-        confirmVariant="danger"
-        loading={deleting}
-      />
+    <div className="flex flex-wrap gap-2">
+      {BOARD_COLORS.map((c) => (
+        <button
+          key={c.value}
+          type="button"
+          onClick={() => onSelect(c.value)}
+          title={c.name}
+          className={`h-7 w-7 rounded-full transition-transform ${
+            selected === c.value ? 'ring-2 ring-offset-2 ring-gray-800 scale-110' : 'hover:scale-105'
+          }`}
+          style={{ backgroundColor: c.value }}
+        />
+      ))}
     </div>
   )
 }
 
-function Modal({ title, onClose, children }) {
+function NewBoardModal({ open, onClose, onCreate, creating }) {
+  const [title, setTitle] = useState('')
+  const [color, setColor] = useState(BOARD_COLORS[0].value)
+
+  useEffect(() => {
+    if (open) {
+      setTitle('')
+      setColor(BOARD_COLORS[0].value)
+    }
+  }, [open])
+
+  if (!open) return null
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">New whiteboard</h2>
+            <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <X size={18} />
+            </button>
+          </div>
+
+          <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
+          <input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled board"
+            className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+
+          <label className="mb-2 block text-sm font-medium text-gray-700">Color</label>
+          <ColorSwatchPicker selected={color} onSelect={setColor} />
+
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={creating}
+              onClick={() => onCreate({ title: title.trim() || 'Untitled board', color })}
+              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {creating && <Loader2 size={14} className="animate-spin" />}
+              <PenTool size={14} />
+              Create & open
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
+function WhiteboardCard({ board, onOpen, onShare, onDelete }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm flex items-center justify-center p-4"
-      onClick={onClose}
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 12 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="w-full max-w-[28rem] bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+      <div
+        className="h-24 w-full cursor-pointer"
+        style={{ background: `linear-gradient(135deg, ${board.color || '#64748b'}22, ${board.color || '#64748b'}66)` }}
+        onClick={() => onOpen(board)}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20">
-          <h3 className="font-display text-base font-bold text-on-surface">{title}</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface/40 hover:bg-surface-container transition-colors">
-            <X size={16} />
-          </button>
+        <div className="flex h-full items-center justify-center">
+          <FileText size={28} style={{ color: board.color || '#64748b' }} />
         </div>
-        <div className="p-5">{children}</div>
-      </motion.div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-3">
+        <div className="flex items-center gap-2">
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: board.color || '#64748b' }}
+          />
+          <h3 className="truncate text-sm font-semibold text-gray-900">{board.title || 'Untitled board'}</h3>
+        </div>
+        <p className="mt-1 text-xs text-gray-400">Edited {timeAgo(board.updatedAt)}</p>
+
+        <div className="mt-3 flex items-center justify-between opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            onClick={() => onOpen(board)}
+            className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline"
+          >
+            <ExternalLink size={12} /> Open
+          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onShare(board)}
+              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              title="Share"
+            >
+              <Share2 size={14} />
+            </button>
+            <button
+              onClick={() => onDelete(board)}
+              className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+              title="Delete"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
     </motion.div>
   )
 }
 
-function BoardCard({ board, isOwner, notebooks = [], onOpen, onDelete, onShare, onMove }) {
-  const [busy, setBusy] = useState(false)
+export default function MyWhiteboards() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const handleMove = async (e) => {
-    const value = e.target.value
-    setBusy(true)
+  const [boards, setBoards] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [creating, setCreating] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [shareTarget, setShareTarget] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [activeColorFilter, setActiveColorFilter] = useState(null)
+
+  const loadBoards = useCallback(async () => {
+    setLoading(true)
     try {
-      await onMove(board._id, value || null)
+      const res = await api.get('/whiteboards')
+      setBoards(res.data || [])
+    } catch (err) {
+      console.error('Failed to load whiteboards', err)
     } finally {
-      setBusy(false)
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadBoards()
+  }, [loadBoards])
+
+  const handleCreate = async ({ title, color }) => {
+    setCreating(true)
+    try {
+      const res = await api.post('/whiteboards', { title, color, ownerId: user?.id })
+      const board = res.data
+      setBoards((prev) => [board, ...prev])
+      setShowNewModal(false)
+      navigate(`/whiteboards/${board.id}`)
+    } catch (err) {
+      console.error('Failed to create whiteboard', err)
+    } finally {
+      setCreating(false)
     }
   }
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await api.delete(`/whiteboards/${deleteTarget.id}`)
+      setBoards((prev) => prev.filter((b) => b.id !== deleteTarget.id))
+    } catch (err) {
+      console.error('Failed to delete whiteboard', err)
+    } finally {
+      setDeleteTarget(null)
+    }
+  }
+
+  const visibleBoards = activeColorFilter
+    ? boards.filter((b) => b.color === activeColorFilter)
+    : boards
+
+  const usedColors = Array.from(new Set(boards.map((b) => b.color).filter(Boolean)))
+
   return (
-    <motion.div
-      layout
-      className="group bg-surface-container-low rounded-2xl border border-outline-variant/20 overflow-hidden flex flex-col"
-    >
-      <button onClick={onOpen} className="flex-1 flex flex-col text-left p-5">
-        <div className="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center mb-3">
-          <FileText size={18} />
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Layers className="text-indigo-600" size={22} />
+          <h1 className="text-xl font-semibold text-gray-900">My Whiteboards</h1>
         </div>
-        <p className="text-sm font-semibold text-on-surface truncate">{board.title}</p>
-        <p className="text-xs text-on-surface/40 mt-1 line-clamp-2 min-h-[2rem]">
-          {board.description || 'No description'}
-        </p>
-        <div className="flex items-center gap-3 mt-3 text-[11px] text-on-surface/30">
-          <span>{board.actions?.length || 0} elements</span>
-          <span>·</span>
-          <span>{timeAgo(board.updatedAt)}</span>
-          {!isOwner && board.owner?.name && (
-            <>
-              <span>·</span>
-              <span className="truncate">by {board.owner.name}</span>
-            </>
-          )}
-        </div>
-      </button>
-      <div className="flex items-center gap-1 px-3 pb-3">
+
         <button
-          onClick={onOpen}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-primary-container/60 text-on-primary-container rounded-xl text-xs font-semibold hover:bg-primary-container transition-colors"
+          onClick={() => setShowNewModal(true)}
+          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
         >
-          <ExternalLink size={13} /> Open
+          <Plus size={16} />
+          New board
         </button>
-        {isOwner ? (
-          <>
-            <button
-              onClick={onShare}
-              aria-label="Share"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-on-surface/50 hover:bg-surface-container hover:text-on-surface transition-colors"
-              title="Share"
-            >
-              <Share2 size={15} />
-            </button>
-            <div className="relative" title="Move to notebook">
-              <Layers size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface/40 pointer-events-none" />
-              <select
-                value={String(board.notebook || '')}
-                onChange={handleMove}
-                disabled={busy}
-                className="pl-8 pr-2 h-9 rounded-xl border border-outline-variant/30 bg-surface-container-lowest text-xs text-on-surface/70 outline-none cursor-pointer disabled:opacity-50"
-              >
-                <option value="">No notebook</option>
-                {notebooks.map((n) => (
-                  <option key={n._id} value={n._id}>{n.name}</option>
-                ))}
-              </select>
-            </div>
-            <button
-              onClick={onDelete}
-              aria-label="Delete"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-on-surface/30 hover:bg-error-container hover:text-error transition-colors"
-              title="Delete"
-            >
-              <Trash2 size={15} />
-            </button>
-          </>
-        ) : (
-          <span className="text-[10px] px-2 py-1 rounded-lg bg-tertiary-container/60 text-on-tertiary-container font-medium">
-            Viewer
-          </span>
-        )}
       </div>
-    </motion.div>
+
+      {usedColors.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-gray-500">Filter:</span>
+          <button
+            onClick={() => setActiveColorFilter(null)}
+            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+              activeColorFilter === null
+                ? 'border-gray-800 text-gray-800'
+                : 'border-gray-200 text-gray-400 hover:border-gray-300'
+            }`}
+          >
+            All
+          </button>
+          {usedColors.map((c) => (
+            <button
+              key={c}
+              onClick={() => setActiveColorFilter(c)}
+              className={`h-6 w-6 rounded-full transition-transform ${
+                activeColorFilter === c ? 'ring-2 ring-offset-2 ring-gray-800 scale-110' : 'hover:scale-105'
+              }`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : visibleBoards.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-16 text-center">
+          <Folder className="mb-3 text-gray-300" size={40} />
+          <p className="text-sm text-gray-500">No whiteboards yet</p>
+          <button
+            onClick={() => setShowNewModal(true)}
+            className="mt-3 flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            <PenTool size={14} />
+            Create your first board
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <AnimatePresence>
+            {visibleBoards.map((board) => (
+              <WhiteboardCard
+                key={board.id}
+                board={board}
+                onOpen={(b) => navigate(`/whiteboards/${b.id}`)}
+                onShare={setShareTarget}
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      <NewBoardModal
+        open={showNewModal}
+        onClose={() => setShowNewModal(false)}
+        onCreate={handleCreate}
+        creating={creating}
+      />
+
+      {shareTarget && (
+        <ShareWhiteboardModal
+          board={shareTarget}
+          onClose={() => setShareTarget(null)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmationModal
+          title="Delete whiteboard?"
+          message={`"${deleteTarget.title}" will be permanently deleted.`}
+          confirmLabel="Delete"
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+    </div>
   )
 }
